@@ -3,17 +3,35 @@ import { MEALS } from "../data/dummy-data";
 import MealDetails from "../components/MealDetails";
 import Subtitle from "../components/MealDetail/Subtitle";
 import List from "../components/MealDetail/List";
-import { useLayoutEffect } from "react";
+// import { useContext, useLayoutEffect } from "react";
 import IconButton from "../components/IconButton";
+import { useDispatch, useSelector } from "react-redux";
+import { addFavorite, removeFavorite } from '../store/redux/favorites'
+// import { FavoritesContext } from "../store/context/favorites-context";
+
+import { useLayoutEffect } from "react";
 
 function MealDetailScreen({ route, navigation }) {
+  // const favoriteMealCtx = useContext(FavoritesContext);
+
+  const favoriteMealIds = useSelector((state) => state.favoriteMeals.ids);
+  const dispatch = useDispatch();
+
   const mealId = route.params.mealId;
 
   const selectedMeal = MEALS.find((meal) => meal.id === mealId);
   console.log("what is the value of selected meal? ", selectedMeal);
 
-  function headerButtonPressHandler() {
+  const mealIsFavorite = favoriteMealIds.includes(mealId);
+
+  function changeFavoriteStatusHandler() {
     console.log('headerButtonPressHandler has been pressed')
+    if (mealIsFavorite) {
+      // favoriteMealCtx.removeFavorite(mealId)
+      dispatch(removeFavorite({id: mealId}))
+    } else {
+      dispatch(addFavorite({id: mealId}))
+    }
   }
 
   console.log('what is navigation? ', navigation)
@@ -21,10 +39,10 @@ function MealDetailScreen({ route, navigation }) {
   useLayoutEffect(() => {
     navigation.setOptions({
         headerRight: () => {
-            return <IconButton onPress={headerButtonPressHandler} icon="star" color="white" />
+            return <IconButton onPress={changeFavoriteStatusHandler} icon={mealIsFavorite ? 'star' : 'star-outline'} color="white" />
         }
     })
-  }, [navigation, headerButtonPressHandler]);
+  }, [navigation, changeFavoriteStatusHandler]);
 
   return (
     <ScrollView style={styles.rootContainer}>
